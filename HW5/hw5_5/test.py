@@ -1,107 +1,31 @@
-import copy
-class Graph:
-    def __init__(self, G : dict = {}, terminals : set = set()) -> None:
-        self.map = G
-        self.visted = set()
-        self.terminals = terminals
-        self.N = len(self.map)
+from graph import *
+import unittest
 
-    def cost(self):
-        return sum(len(neighbors) for neighbors in self.map.values()) // 2
+class TestIsCycle(unittest.TestCase):
 
-    def is_connected(self):
-        visited = set()
-        stack = [0]
-        while stack:
-            v = stack.pop()
-            if v not in visited:
-                visited.add(v)
-                stack.extend(neighbor for neighbor in self.map[v] 
-                            if neighbor not in visited)
-        return len(visited) == len(self.map)
-    
-    def is_acyclic(self):
-        visited = set()
-        stack = set()
+    def setUp(self):
+        self.graph1 = Graph({0: [1, 2], 1: [3], 2: [4], 3: [], 4: []})
+        self.graph2 = Graph({0: [1], 1: [2, 3], 2: [], 3: []})
+        self.graph3 = Graph({0: [1], 1: [2], 2: [3], 3: []})
+        self.graph4 = Graph({0: [1], 1: [2], 2: [3], 3: [0]})
 
-        def dfs(v):
-            if v in stack:
-                return False
-            if v in visited:
-                return True
-            visited.add(v)
-            stack.add(v)
-            for neighbor in self.map[v]:
-                if not dfs(neighbor):
-                    return False
-            stack.remove(v)
-            return True
+    def test_is_cycle_true(self):
+        self.assertTrue(self.graph4.is_cycle())
 
-        for i in range(self.N):
-            if not dfs(i):
-                return False
+    def test_is_cycle_false(self):
+        self.assertFalse(self.graph2.is_cycle())
 
-G = { 0 : {1, 4, 2},
-      1 : {0, 4}, 
-      2 : {0, 4, 3},
-      3 : {2},
-      4 : {0, 1, 2} }
-G2 
-K = {0, 3}
+    def test_is_cycle_empty_graph(self):
+        empty_graph = Graph({})
+        self.assertFalse(empty_graph.is_cycle())
 
-graph = Graph(G, K)
+    def test_is_cycle_single_node(self):
+        single_node_graph = Graph({0: []})
+        self.assertFalse(single_node_graph.is_cycle())
 
-print(graph.N)
-print(graph.is_acyclic())
+    def test_is_cycle_disconnected_graph(self):
+        disconnected_graph = Graph({0: [1], 1: [2, 3], 2: [], 3: []})
+        self.assertFalse(disconnected_graph.is_cycle())
 
-# def is_acyclic(graph):
-#         visited = set()
-#         stack = [i for i in range(len(graph))]
-#         while stack:
-#             v = stack.pop()
-#             if v in visited:
-#                 return False
-#             visited.add(v)
-#             stack.extend(neighbor for neighbor in graph[v]
-#                           if neighbor not in visited)
-#         return True
-
-def is_valid_output(graph):
-
-    if not is_connected(graph):
-        return False
-    
-    if not is_acyclic(graph):
-        return False
-    
-    return True
-
-# def removeV(G, v):
-#     neigbors = G.pop(v)
-#     for n in neigbors:
-#         G[n].remove(v)
-#     return G
-
-# def solve(G, V, K):
-#     if is_connected(G):
-#         best = set(G.keys())
-#     else: 
-#         return 200
-    
-#     if not K:
-#          return set()
-    
-#     for v in V:
-#          if v not in K:
-#             newG = removeV(G, v)
-#             print(newG.keys())
-#             if is_valid_output(newG):
-#                 new_best = solve(newG, V - {v}, K)
-#                 if cost(new_best) < cost(best):
-#                     best = new_best
-    
-#     return best
-
-         
-
-# print(solve(G, V, K))
+if __name__ == '__main__':
+    unittest.main()
