@@ -1,107 +1,65 @@
 import copy
+from graph import Graph
 
-N, M, K = map(int, input().split())
+g1 = { 0 : {1, 4, 2},
+      1 : {0, 4}, 
+      2 : {0, 4, 3},
+      3 : {2},
+      4 : {0, 1, 2} }
+K1 = {0, 3}
+g3 = {0: {11, 6, 8},
+      1: {3, 11, 10, 8},
+      2: {14, 5, 12},
+      3: {9, 4, 1},
+      4: {3, 10},
+      5: {6, 2},
+      6: {0, 5, 14},
+      7: {13, 14, 12},
+      8: {1, 0, 13, 14},
+      9: {11, 3},
+     10: {4, 1, 13},
+     11: {9, 0, 1},
+     12: {7, 2},
+     13: {10, 8, 7},
+     14: {8, 6, 7, 2}}
+K3 = {8, 9, 11, 14}
 
-G = {i : [] for i in range(N)}
-for _ in range(M):
-    u, v = map(int, input().split())
-    G[u].append(v)
-    G[v].append(u)
 
-terminals = set()
-for i in range(K):
-    terminals.add(int(input))
-
-print(G)
-
-
-# G - Graph
-# N - Number of vertices in graph
-
-def MST(G, N):
-    mstSet = set()
-    key = {i: float('inf') for i in range(N)}
-    parent = {i: None for i in range(N)}
-
-    key[0] = 0
-    while len(mstSet) != N:
-        # Find the vertex with the minimum key value from the set of vertices not yet included in MST
-        u = min((v for v in range(N) if v not in mstSet), key=lambda x: key[x])
-        mstSet.add(u)
+def solve(graph : Graph):
+    if graph.numUnknown() == 0:
+        if (graph.is_valid_output()):
+            return graph.cost()
+        else:
+            return 200
         
-        # Update key and parent values for vertices adjacent to u
-        for v in G[u]:
-            if v not in mstSet and 1 < key[v]:
-                key[v] = 1
-                parent[v] = u
-
-    adjacency_map = {i: [] for i in range(N)}
-    for v in range(N):
-        if parent[v] is not None:
-            adjacency_map[parent[v]].append(v)
-            adjacency_map[v].append(parent[v])
-
-    return adjacency_map
-
-def is_valid_output(graph, K):
-    def is_connected(graph):
-        visited = set()
-        stack = [0]
-        while stack:
-            v = stack.pop()
-            if v not in visited:
-                visited.add(v)
-                stack.extend(neighbor for neighbor in graph[v] 
-                              if neighbor not in visited)
-        return len(visited) == len(graph)
+    next = graph.getNextUnknown()
     
-    def is_acyclic(graph):
-        visited = set()
-        stack = [i for i in range(N)]
-        while stack:
-            v = stack.pop()
-            if v in visited:
-                return False
-            visited.add(v)
-            stack.extend(neighbor for neighbor in graph[v]
-                          if neighbor not in visited)
-        return True
-    
+    next_graph1 = copy.deepcopy(graph)
+    cost1 = solve(next_graph1)
 
-    if not is_connected(graph):
-        return False
-    
-    if not is_acyclic(graph):
-        return False
-    
-    for v in K:
-        if v not in graph.keys():
-            return False
-            
-    return True
+    next_graph2 = copy.deepcopy(graph)
+    next_graph2.removeV(next)
+    cost2 = solve(next_graph2)  
 
-def cost(graph):
-    return sum(len(neighbors) for neighbors in graph.values()) // 2
+    return min(cost1, cost2) 
 
-best = G     
-curr = set()
-def solve(items, curr : set, K):  
-    global best   
-    if not items:           
-        if is_valid_output(curr, K) and cost(curr) < cost(best):
-            best = copy.deepcopy(curr)
-    else:
-        x = items.pop()
-        solve(items, curr, K)
-        solve(items, curr.add(x), K)
-        
+def __main__():
+    N, M, K = map(int, input().split())
 
-G = { 0 : [1, 4, 2],
-      1 : [0, 4], 
-      2 : [0, 4, 3],
-      3 : [2],
-      4 : [0, 1, 2] }
-K = {0, 3}
-items = {1, 2, 4} # All nodes not needed
+    G = {i : set() for i in range(N)}
+    for _ in range(M):
+        u, v = map(int, input().split())
+        G[u].add(v)
+        G[v].add(u)
 
-print(solve(items, G, K))
+    terminals = set()
+    for i in range(K):
+        terminals.add(int(input()))
+
+    graph = Graph(G, terminals)
+
+    print(G)
+
+    # print(solve(graph))
+
+__main__()
