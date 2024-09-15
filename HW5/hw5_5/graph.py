@@ -78,3 +78,24 @@ class Graph:
         self.visited.add(v)
 
         return v
+    
+    def preProcess(self):
+        # Remove terminals from removal candidates
+        self.unvisited -= self.terminals
+
+        # Remove vertices that are the only neighbor of a 
+        # terminal from set of canditates
+        to_remove = []
+        for v in self.map:
+            neighbors = self.map[v]
+            if v in self.terminals:
+                if len(neighbors) == 1:
+                    self.unvisited.remove(next(iter(neighbors)))
+            elif len(neighbors) == 1:
+                to_remove.append(next(iter(neighbors)))
+
+        for v in to_remove:
+            if v in self.map:
+                self.removeV(v)
+            if v in self.unvisited:
+                self.unvisited.remove(v)

@@ -24,24 +24,56 @@ g3 = {0: {11, 6, 8},
      14: {8, 6, 7, 2}}
 K3 = {8, 9, 11, 14}
 
+G1 = Graph(g1, K1)
+G3 = Graph(g3, K3)
+
+# def solve(graph : Graph):
+#     if graph.numUnknown() == 0:
+#         if (graph.is_valid_output()):
+#             return graph.cost()
+#         else:
+#             return 200
+        
+#     next = graph.getNextUnknown()
+    
+#     next_graph1 = copy.deepcopy(graph)
+#     cost1 = solve(next_graph1)
+
+#     next_graph2 = copy.deepcopy(graph)
+#     next_graph2.removeV(next)
+#     cost2 = solve(next_graph2)  
+
+#     return min(cost1, cost2) 
 
 def solve(graph : Graph):
-    if graph.numUnknown() == 0:
-        if (graph.is_valid_output()):
-            return graph.cost()
-        else:
-            return 200
+    best = 200
+
+    def _solve(graph : Graph):
+        nonlocal best
         
-    next = graph.getNextUnknown()
+        if graph.numUnknown() == 0:
+            if (graph.is_valid_output()):
+                current_cost = graph.cost()
+                best= min(best, current_cost)
+                return current_cost
+            else:
+                return 200
+            
+        next = graph.getNextUnknown()
+        
+        next_graph1 = copy.deepcopy(graph)
+        cost1 = solve(next_graph1)
+
+        next_graph2 = copy.deepcopy(graph)
+        next_graph2.removeV(next)
+        cost2 = solve(next_graph2)  
+
+        return min(cost1, cost2) 
     
-    next_graph1 = copy.deepcopy(graph)
-    cost1 = solve(next_graph1)
+    return _solve(graph)
 
-    next_graph2 = copy.deepcopy(graph)
-    next_graph2.removeV(next)
-    cost2 = solve(next_graph2)  
-
-    return min(cost1, cost2) 
+# G3.preProcess()
+# print(solve(G3))
 
 def __main__():
     N, M, K = map(int, input().split())
@@ -57,9 +89,8 @@ def __main__():
         terminals.add(int(input()))
 
     graph = Graph(G, terminals)
-
-    print(G)
-
-    # print(solve(graph))
+    graph.preProcess()
+    
+    print(solve(graph))
 
 __main__()
